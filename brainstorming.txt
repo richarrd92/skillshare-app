@@ -1,0 +1,4 @@
+TODO
+
+- Implement the main script ie entry point for the app
+- Implement the database connection script - ensure database is only loaded once if possible

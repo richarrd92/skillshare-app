@@ -9,6 +9,7 @@ This document explains the schema design, table relations, and core logic for th
 - Matches connect two users with complementary or mutual skills:
   - `trade` = users offer and want to learn different skills.
   - `learn` = one-sided learning request.
+  
   - `mutual` = users share the same skill and want to connect.
 - Users **message** each other within matches, with threaded replies.
 - After sessions, users can leave **reviews** tied to the skill and match.

@@ -1,5 +1,5 @@
 # Skillshare App
-A micro skill-barter web platform that lets users offer and request skills from others in their area or online. Built to showcase full-stack problem solving, real-world functionality, and clean architecture.
+A micro skill-barter web platform that lets users offer and request skills from others in their area or online. This app is built to showcase full-stack problem solving, real-world functionality, and clean architecture using modern tools like React, FastAPI, and Firebase.
 
 ### Features
 
@@ -8,7 +8,15 @@ A micro skill-barter web platform that lets users offer and request skills from 
 - Search/filter other users by skill
 - Express interest to connect (basic match system)
 - Real-time database (Firestore) or REST backend (FastAPI)
-- Responsive design for mobile + desktop (mobile later)
+- Responsive design for desktop (mobile later)
+
+### Why Open Source?
+
+Skillshare App is open source because we believe in:
+- **Collaborative growth**: Developers from anywhere can suggest improvements or build new features.
+- **Transparency**: Everything from data models to deployment is out in the open to encourage learning and feedback.
+- **Education**: This project is a teaching tool for understanding full-stack architecture, authentication, and database modeling.
+
 
 ### Tech Stack
 
@@ -16,22 +24,18 @@ A micro skill-barter web platform that lets users offer and request skills from 
 |--------------|--------------------|
 | Frontend     | React + Tailwind CSS |
 | Auth         | Firebase Auth       |
-| Backend (Opt)| Firebase Firestore or FastAPI + PostgreSQL |
-| Hosting      | Vercel (Frontend), Firebase/Supabase for backend |
+| Backend      | FastAPI + PostgreSQL |
+| Hosting      | Firebase |
 
 
 ### Getting Started
 
-#### Clone the repo
-```bash
-git clone https://github.com/<your-username>/skill-swap.git
-cd skill-swap
+```
+  git clone https://github.com/<your-username>/skillshare-app.git
+  cd skillshare-app
 ```
 
-### Scalable Project Design
-A scalable architecture for a full-stack Skillshare web application where users can offer and request skills to exchange.
-
-### High-Level Architecture
+#### High-Level Architecture
 
 ```plaintext
 +-------------------+        +-------------------+        +--------------------+
@@ -40,72 +44,31 @@ A scalable architecture for a full-stack Skillshare web application where users 
 +-------------------+        +-------------------+        +--------------------+
 ```
 
-### Frontend Structure (React)
+#### Frontend Structure (React)
 
 ```plaintext
 src/
-├── components/
-│   ├── Auth/
-│   │   ├── LoginForm.jsx
-│   │   └── RegisterForm.jsx
-│   ├── Skills/
-│   │   ├── SkillList.jsx
-│   │   ├── SkillCard.jsx
-│   │   └── SkillDetail.jsx
-│   ├── SwapRequests/
-│   │   ├── RequestList.jsx
-│   │   └── RequestForm.jsx
-│   ├── Profile/
-│   │   └── UserProfile.jsx
-│   └── Common/
-│       ├── Navbar.jsx
-│       └── Footer.jsx
-├── contexts/
-│   └── AuthContext.jsx
-├── hooks/
-│   └── useFetchSkills.js
-├── pages/
-│   ├── Home.jsx
-│   ├── Dashboard.jsx
-│   ├── Login.jsx
-│   ├── Register.jsx
-│   └── NotFound.jsx
-├── services/
-│   └── api.js
-└── App.jsx
+├── components/        # UI components grouped by domain
+├── contexts/          # Auth context
+├── hooks/             # Custom hooks
+├── pages/             # Pages
+├── styles/            # CSS styles
+├── routes/            # Route
+├── firebase/          # firebase connection
+└── App.jsx            # App entry point
 ```
 
-### Backend Structure (FastAPI)
+#### Backend Structure (FastAPI)
 
 ```plaintext
-app/
-├── api/
-│   ├── auth.py           # login, register, JWT token
-│   ├── skills.py         # skill endpoints
-│   ├── swaps.py          # skill swap requests
-│   └── users.py          # user profile
-├── core/
-│   ├── config.py         # env configs
-│   ├── security.py       # JWT, hashing
-│   └── db.py             # DB connection
-├── models/
-│   ├── user.py
-│   ├── skill.py
-│   └── swap.py
-├── schemas/
-│   ├── user.py
-│   ├── skill.py
-│   └── swap.py
-└── main.py               # entry point
+backend/
+├── routes/            # Routes (auth, skills, swaps)
+├── database/          # DB, config, security
+├── models/            # ORM Models
+├── schemas/           # Pydantic schemas
+├── database.py/       # Database connection
+└── main.py            # Entry point
 ```
-
-### Database Schema (Relational – PostgreSQL)
-
-Table	Fields	Description
-- **users**	id, username, email, hashed_pw, bio, created_at	User accounts
-- **skills**	id, user_id (FK), title, category, description, created_at	Skills offered by users
-- **swap_requests**	id, requester_id (FK), skill_id (FK), status, created_at
-
 
 ####  Ideal Development Flow:
 - **Backend First**
@@ -123,30 +86,21 @@ Table	Fields	Description
 
 #### Core User Flow
 - User signs up / logs in
-- Adds skills they can offer
+- Creates profile + adds offered/desired skills
 - Browses other users' skills
 - Sends a request to swap skills
 - Request is accepted/rejected
-- Tracks swap history on their profile
+- Match is confirmed, reviewed, or completed
 
-#### Scalability Tips
-- **Frontend**
-  - Code splitting with React.lazy
-  - Lazy load routes
-  - Separate reusable components
 
-- **Backend**
-  - Use async frameworks (FastAPI, Express + async)
-  - Add caching (Redis) for hot data
-  - Containerize with Docker
+#### Ways to Contribute
+- We welcome your ideas, issues, and pull requests!
+  - Submit pull requests for small fixes, UI improvements, or new features.
+  - Help improve this documentation or write new guides.
 
-- **Database**
-  - Use indexing on user_id, skill_id
-  - Paginate list views
-  - Archive old data
-
-#### Future Enhancements
-- Real-time messaging (Socket.io or WebSockets)
-- Skill ratings and feedback
-- Notifications (email / in-app)
-- Mobile version with React Native or Flutter
+#### Contribution Guidelines
+1. **Fork** the repository and **clone** it to your machine.
+2. Create a **new branch** for your feature or fix:
+```
+git checkout -b feat/add-messaging
+```
