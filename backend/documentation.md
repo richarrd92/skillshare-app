@@ -1,5 +1,5 @@
 # Backend Documentation
-This is the backend for the Skill Swap App, built using FastAPI. It handles user authentication, skill data, and swap request logic through a RESTful API.
+This is the backend for the Skillshare App, built using FastAPI. It handles user authentication, skill data, and swap request logic through a RESTful API.
 
 ### Tech Stack
 - **FastAPI** – modern Python web framework

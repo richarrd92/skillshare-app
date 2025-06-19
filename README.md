@@ -1,4 +1,4 @@
-# Skill Swap App
+# Skillshare App
 A micro skill-barter web platform that lets users offer and request skills from others in their area or online. Built to showcase full-stack problem solving, real-world functionality, and clean architecture.
 
 ### Features
@@ -29,7 +29,7 @@ cd skill-swap
 ```
 
 ### Scalable Project Design
-A scalable architecture for a full-stack Skill Swap web application where users can offer and request skills to exchange.
+A scalable architecture for a full-stack Skillshare web application where users can offer and request skills to exchange.
 
 ### High-Level Architecture
 
