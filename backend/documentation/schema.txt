@@ -1,0 +1,33 @@
+SkillShare App Database Schema Overview
+
+This document explains the schema design, table relations, and core logic for the SkillShare social platform.
+
+Core Logic and Workflow:
+
+Users register using external authentication providers like Google or GitHub, so no passwords are stored in the system. After registration, users add skills they either offer or want to learn, tagging their proficiency level such as beginner, intermediate, or expert. The system creates matches connecting two users based on complementary or mutual skills. A "trade" match happens when users offer and want to learn different skills from each other. A "learn" match is a one-sided learning request, while a "mutual" match connects users who share the same skill and want to connect. Within matches, users can message each other with support for threaded replies. After completing sessions, users can leave reviews tied to the specific skill and match. Additionally, users specify their availability to coordinate meeting times effectively. This schema ensures flexibility for a skill-sharing platform focused on community building, learning, and collaboration.
+
+Database Setup and Types:
+
+The database used is named skillshare_app. It has the UUID extension enabled (uuid-ossp) to support universally unique identifiers. Several enumerated types are defined to enforce valid values: 
+  - skill_type (with values "offer" and "learn")
+  - skill_level ("beginner", "intermediate", "expert") 
+  - match_status ("pending", "accepted", "rejected", "completed")
+  - match_type ("trade", "learn", "mutual") to specify the kind of user connection
+
+Tables and Relations:
+
+1. Users table stores user information such as name, email, biography, profile picture URL, location, and authentication provider details. The primary key is a UUID id. It has an optional foreign key location_id that references the locations table and is set to NULL if the location is deleted.
+
+2. Locations table stores geographical information like city, region, country, coordinates, and timezone. The primary key is a UUID id.
+
+3. Skills table is a catalog of skills users can offer or want to learn. New skills can be added by users, tracked with a created_by field referencing the users table. The primary key is a UUID id. The created_by foreign key is set to NULL if the user is deleted.
+
+4. User_skills table links users to their skills and contains additional details such as whether they offer or want to learn the skill, their proficiency level, and an optional description. The primary key is a UUID id. Foreign keys user_id and skill_id reference users and skills respectively with cascade deletes. There is a uniqueness constraint on the combination of user_id, skill_id, and type to prevent duplicate entries.
+
+5. Matches table represents connections between two users based on skills. It supports different match types (trade, learn, mutual) and tracks the match status. The primary key is a UUID id. Foreign keys initiator_id and receiver_id point to users. Initiator_skill_id and receiver_skill_id reference user_skills. All foreign keys cascade on delete.
+
+6. Messages table stores conversation messages between matched users and supports threaded replies via reply_to_message_id. The primary key is a UUID id. Foreign keys match_id and sender_id reference matches and users respectively, with cascade deletes. The reply_to_message_id references messages and is set to NULL if the replied message is deleted.
+
+7. Reviews table allows users to review each other after a match on a specific skill. Ratings range from 1 to 5. The primary key is a UUID id. Foreign keys match_id, reviewer_id, reviewee_id, and skill_id reference matches, users, and skills, with cascade delete behavior.
+
+8. Availability table tracks users’ available days and times with timezone information, helping schedule skill sharing sessions. The primary key is a UUID id. The user_id foreign key references users and cascades on delete. Constraints ensure valid day of week values (0 to 6) and valid time ranges.

@@ -1,0 +1,11 @@
+How database.py Works
+
+The database.py file in the Skillshare App backend is responsible for initializing and managing the SQLAlchemy connection to a PostgreSQL database using credentials stored securely in a .env file. At the start, it checks whether the environment variables have already been loaded using a module-level flag. If not, it looks for the .env file in the project root and loads it using dotenv.load_dotenv(). This ensures the database URL (stored as SKILLSHARE_DATABASE_URL) is available in the environment.
+
+The core of the file is the init_db() function, which is called immediately to initialize three key SQLAlchemy components: the database engine, session factory (SessionLocal), and declarative base class (Base). These are stored as module-level singletons to avoid re-initialization during imports. The engine is created using create_engine() with the loaded database URL, and a connection test is performed using engine.connect() to catch any connection errors. If successful, the session factory is created with sessionmaker() and the ORM base class is instantiated using declarative_base(). The metadata associated with this base class is then used to create all tables in the database using Base.metadata.create_all(bind=engine), based on defined SQLAlchemy models.
+
+A get_db() function is provided as a FastAPI dependency, which ensures that each route gets a clean, isolated session that is automatically closed after the request completes. This function is crucial for managing the lifecycle of database transactions safely.
+
+To validate the database connection, the test_db_connection() function performs a simple SELECT 1 query using SQLAlchemy’s text() construct. This query checks whether the database is reachable and functioning correctly. The value 1 is returned directly from the database and is not stored. This is simply a minimal test to verify connectivity.
+
+Finally, the file includes a check to execute test_db_connection() only if the script is run directly (not when imported), allowing developers to quickly verify their environment setup. This design ensures that the database is initialized once per application run, avoids redundant setup, and integrates cleanly with the rest of the FastAPI backend architecture.

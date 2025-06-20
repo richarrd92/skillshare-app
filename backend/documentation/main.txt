@@ -1,0 +1,11 @@
+How main.py Works (with database.py)
+
+The main.py and database.py files in FastAPI project are designed to work in harmony to support a structured and maintainable backend application. When the application starts, main.py is executed and initializes a FastAPI app instance. Although main.py currently only serves a root endpoint, it is structured to expand as the application grows. Any routes that require database access will later depend on the get_db() dependency function from database.py.
+
+The database.py module is responsible for setting up the entire database layer of the application. It first ensures that a .env file is present, which is crucial for securely managing credentials. It then loads the SKILLSHARE_DATABASE_URL environment variable from the .env file to get the PostgreSQL connection string. Using SQLAlchemy, it attempts to connect to the database and initialize the database engine. It also sets up the declarative base used for defining ORM models and uses Base.metadata.create_all(bind=engine) to automatically create tables based on those models. Additionally, database.py defines a SessionLocal factory for generating new database sessions and a get_db() dependency function for managing those sessions safely within FastAPI routes.
+
+This setup ensures that the database connection is only initialized once per session and reused throughout the application. It is automatically loaded whenever you import from database.py or explicitly call the init_db() function.
+
+As you build out your application and define new API routes (e.g., /users, /skills, etc.), those routes will typically include a db: Session = Depends(get_db) parameter. This allows them to safely access the database using a session provided by SQLAlchemy. Inside these route functions, you’ll use the SQLAlchemy ORM to perform queries, insertions, and updates.
+
+In summary, when you run main.py, it launches the FastAPI server and prepares your app for requests. Any route that involves database operations will rely on the structure and tools established in database.py. This ensures reliable database connections, automatic table creation, and safe session handling. The server is run by Uvicorn, which also supports hot-reloading—automatically updating the app when code changes are detected—making development smoother and more efficient.

@@ -1,0 +1,40 @@
+Backend Documentation
+
+This is the backend for the Skillshare App, built using FastAPI. It handles user authentication, skill data, and swap request logic through a RESTful API.
+
+Tech Stack:
+
+The backend uses several key technologies:
+- FastAPI, a modern Python web framework for building APIs.
+- Uvicorn, an ASGI server used to run the FastAPI application.
+- SQLAlchemy, an Object Relational Mapper (ORM) for interacting with the database.
+- PostgreSQL as the relational database system.
+- Pydantic for data validation and serialization.
+- JWT (JSON Web Tokens) for handling authentication.
+- python-dotenv for managing environment variables securely.
+
+Setup Instructions:
+
+Step 1: Create a virtual environment to isolate project dependencies. Navigate to the backend folder, create the virtual environment using Python’s venv module, and activate it.
+
+Commands:
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+
+Step 2: Install the required dependencies listed in the requirements.txt file by running pip install. Also create a .env file where you will store sensitive environment variables such as database connection strings.
+
+Commands:
+pip install -r requirements.txt
+touch .env
+
+Step 3: To update the requirements.txt file with the currently installed packages, ensure the virtual environment is activated and then run pip freeze redirecting the output into requirements.txt. This keeps track of your dependencies for others or for deployment.
+
+Commands:
+source venv/bin/activate  # if not already activated
+pip freeze > requirements.txt
+
+Step 4: To start the backend server and initialize the database in one step, run the provided shell script located in the project root folder by executing ./start.sh. This script handles killing any existing backend process on the configured port, activates the virtual environment, initializes the database connection and tables, and runs the FastAPI server. It also ensures graceful shutdown of the backend when you exit.
+
+Command:
+./start.sh
