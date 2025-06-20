@@ -1,0 +1,54 @@
+TODO
+
+- Implement the main script ie entry point for the app
+- Implement the database connection script - ensure database is only loaded once if possible
+
+-- Profile Picture LINKS
+    - WHEN TO ADD AND KEEP DUMMY 
+        - Only if you’re documenting or mocking structure without loading data.
+        - If this is schema-only SQL meant to be forked/filled later.
+    - WHEN NOT ADD AND KEEP DUMMY 
+        - You're populating production data
+            - Uploaded profile image links (e.g., from Firebase Storage, S3, Cloudinary)
+            - CDN-hosted public links
+        - You're working on staging/dev and want realistic content
+            - Use placeholder image services for safe dummy data:   
+                - https://i.pravatar.cc/300?img=10 – Realistic avatars
+
+==> APP FEATURE IDEAS
+
+- Streaks / Activity Points System:
+    - Reward consistency in posting or engaging with matches.
+    - Streak-based features (e.g., “3-day poster” gets profile boost).
+
+- Hobby Events or Meetups - Something like a snapchat map to see trending spots:
+    - Users can create virtual/in-person events for specific hobbies.
+    - RSVP system.
+    - Optional group chat for each event.
+
+- Connection History / Friend System:
+    - See a list of users you’ve matched or interacted with.
+    - Send follow-up connection requests.
+    - Maybe show last active or current streaks.
+
+- Reactions or Comments on 24hr Posts:
+    - Lightweight interaction: ❤️ 👍 🔥
+    - Optionally allow short comments (with moderation).
+
+--Additional thoughts:
+
+- You might want an index on expires_at to efficiently query active posts.
+- You could add a "likes" or "comments" feature later if desired.
+- The app backend should have a scheduled cleanup job or just filter out expired posts dynamically.
+
+- Limiting posts per day per user — and here’s why:
+    - Prevent spam: Avoid clutter or abuse of the feature.
+    - Maintain quality: Encourages users to be intentional about what they share.
+    - Simplifies recommendations: Easier to select "the best post" per user for the day.
+    - Aligns with ephemeral nature: If the posts disappear after 24 hours, one post/day keeps it meaningful.
+
+- Optional Premium/Niche Features
+    - Age-based filters for minors/adults.
+    - Verified users (photo or platform verification).
+    - Private mode — post and explore without appearing in matches.
+    - Voice intros or short videos on profile.
