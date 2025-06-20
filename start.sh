@@ -8,6 +8,9 @@
 BACKEND_PORT=8000
 
 # --- KILL OLD PROCESS ON BACKEND PORT (if any) ---
+echo
+echo "---------------------- RUNNING START.SH SCRIPT ----------------------"
+echo
 echo "Checking for existing backend on port $BACKEND_PORT..."
 lsof -ti:$BACKEND_PORT | xargs kill -9 2>/dev/null
 
@@ -24,11 +27,13 @@ else
 fi
 
 # Step 1: Initialize database (connection, tables, etc.)
-echo "Initializing database..."
+echo
 python3 database.py || { echo "Database init failed."; exit 1; }
 
 # Step 2: Start main FastAPI server
-echo "Running main FastAPI app..."
+echo
+echo "-------- RUNNING MAIN FASTAPI APP --------"
+echo
 python3 main.py &
 backend_pid=$!
 

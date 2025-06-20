@@ -6,3 +6,5 @@ venv
 *.pyc
 __pycache__/
 /secrets/
+app.log
+notes.txt

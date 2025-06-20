@@ -1,0 +1,30 @@
+How logger.py Works
+
+The logger.py file in the HobbyMatch App backend provides a centralized and reusable logging utility that outputs application logs to both the console and a file. This is useful for consistent monitoring, debugging, and auditability across the entire application.
+
+At its core, the file defines a setup_logger() function that initializes a logging system using Python’s built-in logging module. 
+
+The function takes two optional parameters:
+    - log_file: the file path where logs should be saved ("app.log" by default).
+    - level: the logging severity threshold (logging.INFO by default), determining which messages are recorded.
+
+When invoked, setup_logger() creates a logger instance (the root logger) and clears any existing handlers to avoid duplicate logs, which can happen if the logger is initialized multiple times (e.g., during development hot reloads).
+
+Two logging handlers are then configured:
+    - Console Handler: Sends logs to stdout so they appear in the terminal.
+    - File Handler: Writes logs to the specified log file for persistent storage.
+
+Both handlers share the same log format, which includes:
+    - A timestamp (%(asctime)s)
+    - The log level (%(levelname)s)
+    - The actual log message (%(message)s)
+
+This consistent formatting ensures readability and simplifies debugging when reading logs from either source.
+
+At the end of the file, logger = setup_logger() is executed at the module level. This means the logger is automatically initialized and can be imported and reused across the entire backend (from logger import logger), eliminating the need to repeatedly configure logging in individual modules.
+
+Additionally, when logger.py is run directly as a script (e.g., python logger.py), it demonstrates basic usage by:
+    - Logging an INFO message (Logger initialized - plaintext format)
+    - Deliberately triggering a ZeroDivisionError and logging it with full stack trace using exc_info=True
+
+This file ensures that logs are managed uniformly across the HobbyMatch backend, making it easier to trace errors, monitor runtime activity, and maintain high-quality development practices.

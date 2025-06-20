@@ -12,12 +12,13 @@ from dotenv import load_dotenv
 import os
 import sys
 from sqlalchemy.exc import OperationalError
+from logger import logger
 
 # Load environment variables only once per Python session, even if this module is imported multiple times.
 if not hasattr(sys.modules[__name__], "_env_loaded"):
     # Exits the app if .env is missing.
     if not os.path.isfile(".env"):
-        print({"error message": "Missing .env file. Please create one with database credentials."}, file=sys.stderr)
+        logger.error("Missing .env file. Please create one with database credentials.")
         sys.exit(1)
     load_dotenv() # Loads all KEY=value pairs in .env into the environment.
     setattr(sys.modules[__name__], "_env_loaded", True) # Sets a flag to prevent re-loading .env.
@@ -25,7 +26,7 @@ if not hasattr(sys.modules[__name__], "_env_loaded"):
 # Load the database URL from environment
 DATABASE_URL = os.getenv("HOBBYMATCH_DATABASE_URL")
 if not DATABASE_URL:
-    print({"error message": "HOBBYMATCH_DATABASE_URL is not set in .env."}, file=sys.stderr)
+    logger.error("HOBBYMATCH_DATABASE_URL is not set in .env.")
     sys.exit(1) # Gracefully exits if DB URL is missing.
 
 # Use module-level singletons to avoid multiple initializations
@@ -43,19 +44,18 @@ def init_db():
     # Note: Engine is the core SQLAlchemy object that manages DB connections.
     # Creates Engine
     if _engine is None:
-        print("\n-------- INITIALIZING HOBBYMATCH DATABASE CONNECTION --------\n")
-        print(f"Connecting to: {DATABASE_URL}")
+        logger.info("\n\n-------- INITIALIZING HOBBYMATCH DATABASE CONNECTION --------\n")
 
         # Attempts to create a connection to the database.
         try:
             _engine = create_engine(DATABASE_URL)
             with _engine.connect() as conn:
-                print("Database engine connected successfully.")
+                logger.info("Database engine connected successfully.")
         except OperationalError as e:
-            print({"error message": f"Connection failed. {e}"}, file=sys.stderr)
+            logger.error(f"Connection failed. {e}")
             sys.exit(1)
         except Exception as e:
-            print({"error message": f"Unexpected connection error. {e}"}, file=sys.stderr)
+            logger.error(f"Unexpected connection error. {e}")
             sys.exit(1)
 
     # A SessionLocal() will be used inside your API endpoints to interact with the database.
@@ -70,11 +70,11 @@ def init_db():
         _Base = declarative_base()
 
         try:
-            print("Creating tables for Hobbymatch App...")
+            logger.info("Creating tables for Hobbymatch App...")
             _Base.metadata.create_all(bind=_engine)
-            print("All tables created or verified successfully.")
+            logger.info("All tables created or verified successfully.")
         except Exception as e:
-            print({"error message": f"Table creation error: {e}"}, file=sys.stderr)
+            logger.error(f"Table creation error: {e}")
             sys.exit(1)
 
     return _engine, _SessionLocal, _Base # Returns initialized instances so other files can use them.
@@ -98,10 +98,10 @@ def test_db_connection():
     try:
         with engine.connect() as conn:
             result = conn.execute(text("SELECT 1"))
-            print("Database test successful:", result.scalar())
-            print("\n-------- SKILLSHARE DB CONNECTED --------\n")
+            logger.info(f"Database test successful: {result.scalar()}")
+            logger.info("Hobbymatch Database Connection Initialized.")
     except Exception as e:
-        print({"error message": f"Test query failed: {e}"}, file=sys.stderr)
+        logger.error(f"Test query failed: {e}")
 
 # Only run when executing this file directly
 if __name__ == "__main__":

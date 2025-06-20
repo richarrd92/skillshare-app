@@ -47,10 +47,12 @@ The purpose of HobbyMatch is to:
 
 ```plaintext
 backend/
+├── documentation/     # Documentation text files
 ├── routes/            # Routes (auth, hobbies, posts, matches, events, etc.)
 ├── models/            # ORM Models
 ├── schemas/           # Pydantic schemas
 ├── database.py        # Database connection
+├── logger.py          # Logging utility
 ├── main.py            # Entry point
 └── main.sql           # Database schema
 ```
