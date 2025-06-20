@@ -2,7 +2,7 @@
 
 # -----------------------------------------------------------------------------
 # Script to initialize environment, connect database, and start FastAPI backend
-# For the Skillshare App (backend only)
+# For the HobbyMatch App (backend only)
 # -----------------------------------------------------------------------------
 
 BACKEND_PORT=8000
@@ -12,7 +12,7 @@ echo "Checking for existing backend on port $BACKEND_PORT..."
 lsof -ti:$BACKEND_PORT | xargs kill -9 2>/dev/null
 
 # --- START BACKEND ---
-echo "Starting Skillshare App backend on http://localhost:$BACKEND_PORT ..."
+echo "Starting HobbyMatch App backend on http://localhost:$BACKEND_PORT ..."
 cd backend || { echo "Backend folder not found!"; exit 1; }
 
 # Activate virtual environment

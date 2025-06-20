@@ -11,7 +11,7 @@ app = FastAPI()
 @app.get("/")
 def read_root():
     # Return a JSON response with a message confirming that the backend is running
-    return {"message" : "Skillshare App Backend is running!"}
+    return {"message" : "HobbyMatch App Backend Server is running!"}
 
 # This conditional block ensures the following code only runs
 # if this file is executed directly (e.g., `python main.py`)

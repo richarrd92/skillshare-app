@@ -23,9 +23,9 @@ if not hasattr(sys.modules[__name__], "_env_loaded"):
     setattr(sys.modules[__name__], "_env_loaded", True) # Sets a flag to prevent re-loading .env.
 
 # Load the database URL from environment
-DATABASE_URL = os.getenv("SKILLSHARE_DATABASE_URL")
+DATABASE_URL = os.getenv("HOBBYMATCH_DATABASE_URL")
 if not DATABASE_URL:
-    print({"error message": "SKILLSHARE_DATABASE_URL is not set in .env."}, file=sys.stderr)
+    print({"error message": "HOBBYMATCH_DATABASE_URL is not set in .env."}, file=sys.stderr)
     sys.exit(1) # Gracefully exits if DB URL is missing.
 
 # Use module-level singletons to avoid multiple initializations
@@ -43,7 +43,7 @@ def init_db():
     # Note: Engine is the core SQLAlchemy object that manages DB connections.
     # Creates Engine
     if _engine is None:
-        print("\n-------- INITIALIZING SKILLSHARE DATABASE CONNECTION --------\n")
+        print("\n-------- INITIALIZING HOBBYMATCH DATABASE CONNECTION --------\n")
         print(f"Connecting to: {DATABASE_URL}")
 
         # Attempts to create a connection to the database.
@@ -70,7 +70,7 @@ def init_db():
         _Base = declarative_base()
 
         try:
-            print("Creating tables for Skillshare App...")
+            print("Creating tables for Hobbymatch App...")
             _Base.metadata.create_all(bind=_engine)
             print("All tables created or verified successfully.")
         except Exception as e:

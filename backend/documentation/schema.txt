@@ -1,33 +1,275 @@
-SkillShare App Database Schema Overview
+==> HobbyMatch App Database Schema Overview
 
-This document explains the schema design, table relations, and core logic for the SkillShare social platform.
+This document outlines the database schema, table relationships, and the core logic behind the HobbyMatch social platform.
 
 Core Logic and Workflow:
 
-Users register using external authentication providers like Google or GitHub, so no passwords are stored in the system. After registration, users add skills they either offer or want to learn, tagging their proficiency level such as beginner, intermediate, or expert. The system creates matches connecting two users based on complementary or mutual skills. A "trade" match happens when users offer and want to learn different skills from each other. A "learn" match is a one-sided learning request, while a "mutual" match connects users who share the same skill and want to connect. Within matches, users can message each other with support for threaded replies. After completing sessions, users can leave reviews tied to the specific skill and match. Additionally, users specify their availability to coordinate meeting times effectively. This schema ensures flexibility for a skill-sharing platform focused on community building, learning, and collaboration.
+Users sign up using external authentication providers like Google, no passwords are stored. Upon joining, users select up to three hobbies from a shared list and rank them by interest (1 = most interested, 3 = least). These hobby rankings drive the matching algorithm, which connects users based on shared or complementary interests.
+
+Matches are categorized by intent:
+- Social: General interest-based connection.
+- Mutual: Both users share a top hobby and want to connect.
+- Trade: One user wants to learn a hobby that another user can offer guidance in.
+
+Each match references specific hobbies selected by the users. Users can chat within matches via threaded messages, leave reviews after meeting, and receive real-time notifications about match requests, messages, and feedback. Optional features like user availability and location allow more relevant and timely connections.
+
+Users can post daily short-lived content, join matches, chat, and review interactions.
+  - Users can create or view Hobby Events tagged with hobbies and geolocations.
+  - Events show on a heatmap with intensity based on user RSVPs.
+  - Users can RSVP to events and have a flake history score (rank 1–10) reflecting their reliability.
+  - Attendees’ commitment history is tracked to give others insight on how likely participants are to actually attend.
+
 
 Database Setup and Types:
 
-The database used is named skillshare_app. It has the UUID extension enabled (uuid-ossp) to support universally unique identifiers. Several enumerated types are defined to enforce valid values: 
-  - skill_type (with values "offer" and "learn")
-  - skill_level ("beginner", "intermediate", "expert") 
-  - match_status ("pending", "accepted", "rejected", "completed")
-  - match_type ("trade", "learn", "mutual") to specify the kind of user connection
+The database is named `hobbymatch_app`. The `uuid-ossp` extension is enabled for UUID-based identifiers. Enumerated types are defined to maintain integrity:
+- `hobby_rank` (1, 2, 3)
+- `match_status` ("pending", "accepted", "rejected", "completed")
+- `match_type` ("social", "mutual", "trade")
+- `event_status` ("upcoming", "completed", "cancelled") — tracks event lifecycle
+- `attendance_status` ("going", "not_going", "maybe", "flaked") — tracks RSVP status including flakes
 
 Tables and Relations:
 
-1. Users table stores user information such as name, email, biography, profile picture URL, location, and authentication provider details. The primary key is a UUID id. It has an optional foreign key location_id that references the locations table and is set to NULL if the location is deleted.
+1. Users
+   - Stores user data: name, email, profile picture, short bio, and external auth info.
+   - Optional foreign key `location_id` references `locations` and is set to NULL if location is deleted.
+   - Primary key: UUID `id`.
 
-2. Locations table stores geographical information like city, region, country, coordinates, and timezone. The primary key is a UUID id.
+2. User_Photos
+  - Allows each user to upload up to 3 additional photos, ordered by position (1, 2, or 3).
+  - Stores user_id, photo_url, and position for each image.
+  - Enforces uniqueness on (user_id, position) to prevent duplicate slots.
+  - Foreign key: user_id references users and cascades on delete.
+  - Primary key: UUID id.
 
-3. Skills table is a catalog of skills users can offer or want to learn. New skills can be added by users, tracked with a created_by field referencing the users table. The primary key is a UUID id. The created_by foreign key is set to NULL if the user is deleted.
+3. Locations
+   - Captures city, region, country, coordinates, and timezone.
+   - Supports geographic relevance for future matching features.
+   - Primary key: UUID `id`.
 
-4. User_skills table links users to their skills and contains additional details such as whether they offer or want to learn the skill, their proficiency level, and an optional description. The primary key is a UUID id. Foreign keys user_id and skill_id reference users and skills respectively with cascade deletes. There is a uniqueness constraint on the combination of user_id, skill_id, and type to prevent duplicate entries.
+4. Hobbies
+   - Central list of hobbies users can select from.
+   - Includes hobby name, category (e.g., outdoors, entertainment), and optional tags for filtering.
+   - Primary key: UUID `id`.
 
-5. Matches table represents connections between two users based on skills. It supports different match types (trade, learn, mutual) and tracks the match status. The primary key is a UUID id. Foreign keys initiator_id and receiver_id point to users. Initiator_skill_id and receiver_skill_id reference user_skills. All foreign keys cascade on delete.
+5. User_Hobbies
+   - Links users to their top 1–3 ranked hobbies.
+   - Stores user_id, hobby_id, and hobby_rank (1, 2, or 3).
+   - Composite uniqueness constraint on (user_id, hobby_id) to avoid duplicates.
+   - Primary key: UUID `id`.
 
-6. Messages table stores conversation messages between matched users and supports threaded replies via reply_to_message_id. The primary key is a UUID id. Foreign keys match_id and sender_id reference matches and users respectively, with cascade deletes. The reply_to_message_id references messages and is set to NULL if the replied message is deleted.
+6. Matches
+   - Connects two users through shared or related hobbies.
+   - Tracks match status and intent (match_type).
+   - References the specific user_hobbies selected by both initiator and receiver.
+   - Foreign keys: `initiator_id`, `receiver_id`, `initiator_hobby_id`, `receiver_hobby_id`.
+   - Cascades on delete.
+   - Primary key: UUID `id`.
 
-7. Reviews table allows users to review each other after a match on a specific skill. Ratings range from 1 to 5. The primary key is a UUID id. Foreign keys match_id, reviewer_id, reviewee_id, and skill_id reference matches, users, and skills, with cascade delete behavior.
+7. Messages
+   - Chat system for users in a match.
+   - Tracks sender, content, timestamp, and optional `reply_to_message_id` for threading.
+   - Foreign keys: `match_id`, `sender_id` (users), and `reply_to_message_id` (self-referencing).
+   - Cascades on delete.
+   - Primary key: UUID `id`.
 
-8. Availability table tracks users’ available days and times with timezone information, helping schedule skill sharing sessions. The primary key is a UUID id. The user_id foreign key references users and cascades on delete. Constraints ensure valid day of week values (0 to 6) and valid time ranges.
+8. Reviews
+   - Enables users to leave feedback and ratings after interactions.
+   - Reviews are tied to a specific match and hobby.
+   - Rating scale: 1 to 5.
+   - Foreign keys: `match_id`, `reviewer_id`, `reviewee_id`, `hobby_id`.
+   - Cascades on delete.
+   - Primary key: UUID `id`.
+
+9. Notifications
+   - Stores system-generated alerts for events like new matches, messages, or reviews.
+   - Includes recipient user, message content, type, and read/unread status.
+   - Foreign key: `user_id` references `users`.
+   - Primary key: UUID `id`.
+
+10. Availability (Optional/Scalable)
+   - Lets users specify days and time windows when they're free to meet or chat.
+   - Fields: day_of_week (0 = Sunday, 6 = Saturday), start_time, end_time, timezone.
+   - Foreign key: `user_id` references `users` and cascades on delete.
+   - Primary key: UUID `id`.
+   - Constraints ensure valid time and day ranges.
+
+11. User_Posts
+  - Stores temporary posts made by users to share daily activities.
+  - Posts expire after 24 hours to keep content fresh and timely.
+  - Fields include content, timestamps, and optional hobby_id for relevance-based recommendations.
+  - Foreign key user_id references users and cascades on delete.
+  - Foreign key hobby_id references hobbies and is set to NULL if hobby is deleted.
+  - Primary key: UUID id.
+
+12. Hobby_Events
+  - Stores events related to hobbies, including location and time.
+  - Events can be virtual or in-person meetup spots tagged with a hobby.
+  - Event location supports geo-coordinates for heatmap visualization.
+  - Includes status to manage event lifecycle (upcoming, completed, cancelled).
+  - Tracks number of RSVPs dynamically for heatmap intensity.
+  - Primary key: UUID id.
+
+13. Event_Attendees
+  - Tracks user RSVPs to events.
+  - Records user attendance status, including if they flaked on previous events.
+  - Supports tracking commitment and reliability of attendees.
+  - Foreign keys to users and hobby_events.
+  - Primary key: UUID id.
+
+14. User_Flake_History
+  - Maintains a reliability score (1–10) per user indicating how often they follow through on commitments.
+  - Score updates dynamically based on attendance behavior (e.g., number of flakes, attendance rate).
+  - Helps other users evaluate trustworthiness before joining events or matches.
+  - Foreign key to users.
+  - Primary key: UUID id.
+
+==> Summary:
+
+This schema powers HobbyMatch’s goal to build real-world and online friendships around shared interests. With flexibility for expanding location-based matching, intelligent ranking logic, and community-driven interactions, it supports a scalable and engaging hobby-sharing experience.
+
+==> Summary of Relationships in HobbyMatch
+
+Users are central:
+- Users form the core of the app. Each user can have:
+  - A location (city, country, etc.)
+  - Multiple hobbies, ranked by interest level (1–3)
+  - Initiated or received matches with other users
+  - Messages exchanged through matches
+  - Reviews after completing a match
+  - Notifications about key events
+  - Up to 3 additional profile photos (via User_Photos)
+  - Temporary blog-style activity posts (via User_Posts) that expire after 24 hours
+
+Hobbies are shared interests or skills:
+- All users draw from a central hobbies list. Each hobby:
+  - Belongs to a category (e.g., sports, entertainment)
+  - Can be tagged with relevant tags for discoverability
+
+user_hobbies defines individual preferences:
+- This table links users to hobbies:
+  - Users can have many hobbies, but only up to 3 are ranked initially
+  - These rankings are used to determine match strength
+    (e.g., perfect match = exact hobby + same ranking)
+
+matches form the interaction core:
+- Matches connect two users:
+  - Can be initiated for social discovery, mutual connection, or skill trade
+  - Reference specific hobbies from each user (user_hobbies)
+  - Carry a status (pending, accepted, etc.)
+  - Drive conversation (messages) and trust (reviews)
+
+messages enable communication:
+- All chat messages are tied to a match and:
+  - Track who sent what and when
+  - Support optional replies for threaded discussion
+
+reviews promote accountability:
+- After a completed match, users can:
+  - Leave ratings and feedback
+  - Specify the hobby the interaction was based on
+  - Help future users assess match quality
+
+notifications keep users engaged:
+- Users receive real-time updates about:
+  - Match requests
+  - New messages
+  - Reviews
+  - System alerts
+
+locations support geographic relevance:
+- Users can optionally link to a location:
+  - Enables future features like local matching, distance filtering
+
+user_photos allow personalization:
+- Each user may upload up to 3 extra photos beyond their profile picture:
+  - Photos are ordered by position (1, 2, or 3)
+  - Helps enrich profiles and visual engagement
+
+user_posts drive short-form sharing:
+- Users can post temporary content about daily activities:
+  - Posts expire after 24 hours to maintain freshness
+  - Posts can optionally be tied to a hobby for better content recommendations- 
+  - Encourages passive discovery and spontaneous connection opportunities
+
+Heatmap Visualization: 
+  - Using hobby_events with latitude/longitude and RSVP counts, the frontend can display “hot” spots where lots of users are attending hobby meetups.
+
+RSVP & Commitment Transparency: 
+  - event_attendees lets users see who is truly “going,” “maybe,” or “flaked,” enhancing trust and decision-making.
+
+Reliability Score: 
+  - user_flake_history encourages accountability by quantifying attendance reliability
+  - Shown on user profiles and event pages.
+
+==> HobbyMatch Matching Logic Flow
+
+1. Initial Matching Criteria: Hobby Overlap
+
+Exact Match (Strongest)
+- Both users have the same top 3 hobbies, in identical order.
+- Example:
+  User A: 1. Soccer, 2. Movies, 3. Music
+  User B: 1. Soccer, 2. Movies, 3. Music
+  --> Perfect match: full overlap + matching preference ranks
+
+Partial Match (Medium to Strong)
+- Users have some hobbies in common, regardless of order.
+- The more overlap and the closer the ranks, the stronger the match score.
+- Example:
+  User A: 1. Soccer, 2. Music, 3. Movies
+  User B: 1. Movies, 2. Soccer, 3. Gaming
+  --> Moderate match: 2 hobbies shared, ranks close but not identical
+
+Low Match (Weaker)
+- Users share 1 hobby or have similar categories but different hobbies.
+
+2. Ranking Weight (1–3 scale)
+- Matches are scored based on:
+  - Rank proximity → a match at rank 3 for both users is stronger than 1 and 3.
+  - Shared ranking position gives a boost.
+
+| Rank Pair | Match Score Impact |
+|-----------|--------------------|
+| 3 & 3     | +3 (Very strong)   |
+| 2 & 2     | +2 (Strong)        |
+| 1 & 1     | +1 (Moderate)      |
+| 3 & 2     | +1.5 (Good)        |
+| 1 & 3     | +0.5 (Weak)        |
+
+3. Hobby Categories Boost Relatedness
+- Even if hobbies are not identical, if they fall under the same hobby_category, they still count toward match compatibility.
+- Example:
+  User A: Hiking (outdoors)
+  User B: Camping (outdoors)
+  --> Soft match: can still connect based on shared category
+
+4. Future Matching Boosters (Optional but Scalable)
+Location:
+- Users in the same city/region get a higher match score.
+- Distance calculation can be added later for proximity filtering.
+
+Age Range:
+- Optional: Users can set a preferred age range for social compatibility.
+- Matches outside the range can be deprioritized.
+
+User Posts (daily activities):
+- Recent 24-hour posts help surface users with similar hobbies or active routines.
+- Posts tagged with hobbies can enhance content-based recommendations.
+- Users viewing similar posts may receive passive match suggestions.
+
+Extra User Photos:
+- Richer visual profiles improve engagement during discovery and browsing.
+- Photo slots (1–3) offer more ways for users to express personality and lifestyle.
+- Visual appeal may be used as a secondary sorting mechanism in future swipe or scroll-based UX.
+
+Availability (optional):
+- If implemented, overlaps in availability can enhance match feasibility.
+- Otherwise, not necessary for async communication (like messaging).
+
+5. Match Type Affects Intent
+- When sending or accepting a match, the match_type determines purpose:
+  - social: For connecting with people who share interests
+  - mutual: For users who share a skill/hobby and want to build a friendship/community
+  - trade: One user offers to teach or guide another in a hobby they’re experienced in

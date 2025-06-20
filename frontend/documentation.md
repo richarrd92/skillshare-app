@@ -1,5 +1,5 @@
 # Frontend Documentation
-This is the React frontend for the Skillshare App. It provides a responsive user interface for registering, viewing skills, and initiating swap requests.
+This is the React frontend for the HobbyMatch App. It provides a responsive user interface for registering, viewing skills, and initiating swap requests.
 
 ### Tech Stack
 - **React** – UI library
